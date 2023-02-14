@@ -1,15 +1,13 @@
-import { ArgumentsCamelCase } from "yargs";
-import { Youtrack } from "youtrack-rest-client";
-import { youtrackMiddleware } from "../../middlewares";
-import { YargsArguments } from "../../types";
+import { Argv } from "yargs";
+import { withYoutrack } from "../../enhancers";
 
-export const command = "youtrack <command>";
+export const command = "youtrack";
 
-export const describe = "";
+export const describe =
+  "Commands related to communication with YouTrack REST API";
 
-export const builder = function (yargs) {
-  return yargs
-    .middleware(youtrackMiddleware)
+export const builder = function (yargs: Argv) {
+  return withYoutrack(yargs)
     .command(require("./field-bundles-enum"))
     .command(require("./fields"))
     .command(require("./projects"))
@@ -17,8 +15,4 @@ export const builder = function (yargs) {
     .command(require("./issue"));
 };
 
-export const handler = async function (
-  argv: ArgumentsCamelCase<YargsArguments>
-): Promise<void> {
-  console.log(argv);
-};
+export const handler = () => {};

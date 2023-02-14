@@ -28,7 +28,7 @@ const fields = [
 ];
 
 export const handler = async function (
-  argv: ArgumentsCamelCase<YargsArgumentsYouTrack & { id: string }>
+  argv: ArgumentsCamelCase<YargsArgumentsYouTrack>
 ): Promise<void> {
   let results = await argv.youtrack.get(
     "admin/customFieldSettings/customFields",

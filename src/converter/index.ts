@@ -1,204 +1,116 @@
-import JiraApi from "jira-client";
-import { Issue, IssueTag, ReducedUser } from "youtrack-rest-client";
-import { JiraComponents } from "../dicts/jira-components";
-import { JiraPriority } from "../dicts/jira-priority";
-import { YouTrackFieldName } from "../dicts/youtrack-fields";
-import { YouTrackPriority } from "../dicts/youtrack-priority";
+import createLogger from "debug";
+import { Issue } from "youtrack-rest-client";
+import { JiraFieldName } from "./dicts/jira/fields";
+import { serializeAssignee } from "./serializers/serializeAssignee";
+import { serializeComponent } from "./serializers/serializeComponent";
+import { serializeIssueAttachments } from "./serializers/serializeIssueAttachments";
+import { serializeIssueComments } from "./serializers/serializeIssueComments";
+import { serializeIssueStatus } from "./serializers/serializeIssueStatus";
+import { serializeIssueTester } from "./serializers/serializeIssueTester";
+import { serializeIssueType } from "./serializers/serializeIssueType";
+import { serializeLabels } from "./serializers/serializeLabels";
+import { serializeIssuePriority } from "./serializers/serializeIssuePriority";
+import { serializeUser } from "./serializers/serializeUser";
+import { JiraExportIssue, JiraExportIssueCustomFieldValue } from "./types";
+import { jiraComponents } from "./dicts/jira/component";
+import { serializeIssueEstimation } from "./serializers/serializeIssueEstimation";
 
-export enum WellKnownFieldName {
-  AGGREGATE_TIME_ORIGINAL_ESTIMATE = "aggregatetimeoriginalestimate",
-  AGGREGATEPROGRESS = "aggregateprogress",
-  AGGREGATETIMEESTIMATE = "aggregatetimeestimate",
-  AGGREGATETIMESPENT = "aggregatetimespent",
-  ASSIGNEE = "assignee",
-  ATTACHMENT = "attachment",
-  COMMENT = "comment",
-  COMPONENTS = "components",
-  CREATED = "created",
-  CREATOR = "creator",
-  DESCRIPTION = "description",
-  DEV_PLATFORM = "customfield_10349",
-  DUEDATE = "duedate",
-  ENVIRONMENT = "environment",
-  EPIC_NAME = "customfield_10011",
-  EPIC_STATUS = "customfield_10012",
-  FIX_VERSIONS = "fixVersions",
-  ISSUEKEY = "issuekey",
-  ISSUELINKS = "issuelinks",
-  ISSUERESTRICTION = "issuerestriction",
-  ISSUETYPE = "issuetype",
-  LABELS = "labels",
-  LAST_VIEWED = "lastViewed",
-  MAIN_BRANCH_NAME = "customfield_10380",
-  PRIORITY = "priority",
-  PROGRESS = "progress",
-  PROJECT = "project",
-  REPORTER = "reporter",
-  RESOLUTION = "resolution",
-  RESOLUTION_DATE = "resolutiondate",
-  SECURITY = "security",
-  SEVERITY = "customfield_10044",
-  STATUS = "status",
-  STATUS_CATEGORY = "statusCategory",
-  STATUSCATEGORYCHANGEDATE = "statuscategorychangedate",
-  SUBSYSTEMS = "customfield_10346",
-  SUBTASKS = "subtasks",
-  SUMMARY = "summary",
-  TEST_BENCH_URL = "customfield_10350",
-  TESTER = "customfield_10348",
-  THUMBNAIL = "thumbnail",
-  TIMEESTIMATE = "timeestimate",
-  TIMEORIGINALESTIMATE = "timeoriginalestimate",
-  TIMESPENT = "timespent",
-  TIMETRACKING = "timetracking",
-  UPDATED = "updated",
-  VERSIONS = "versions",
-  VOTES = "votes",
-  WATCHES = "watches",
-  WORKLOG = "worklog",
-  WORKRATIO = "workratio",
-}
+const log = createLogger("migrator:converter");
 
-const getFieldValue = function (
-  youtrackIssue: Issue,
-  fieldId: YouTrackFieldName
-) {
-  return youtrackIssue.fields?.find((field) => field.id === fieldId)?.value;
+type Options = {
+  projectKey: string;
 };
 
-const convertYouTrackTagToJiraTag = (youtrackIssueTag: IssueTag) =>
-  youtrackIssueTag.name.replace(/\s/g, "-").toLowerCase();
+const serializeIssueCustomFieldValues = (youtrackIssue: Issue) => {
+  const values: JiraExportIssueCustomFieldValue[] = [];
+  const testerUserId = serializeIssueTester(youtrackIssue.fields);
 
-const convertYouTrackUserToJiraUser = (youtrackUser: ReducedUser) => {
-  // Сгенерируйте мапу
-  const userMap = require("../dicts/users.json");
-  return userMap[youtrackUser.id];
-};
-
-const getYouTrackIssueType = (youtrackIssue: Issue) => {
-  return "10006";
-  return youtrackIssue.fields?.find((field) => field.name === "Type");
-};
-
-const getYouTrackIssueStatus = (youtrackIssue: Issue) => {
-  return youtrackIssue.fields?.find((field) => field.name === "State");
-};
-
-const getJiraIssueComponent = (youtrackIssue: Issue) => {
-  const subsystem = getFieldValue(youtrackIssue, YouTrackFieldName.SUBSYSTEM);
-  const devPlatform = getFieldValue(
-    youtrackIssue,
-    YouTrackFieldName.DEV_PLATFORM
-  );
-
-  if (subsystem?.name === "Product") {
-    return JiraComponents.DEV_PLATFORM_PRODUCT;
+  if (testerUserId) {
+    values.push({
+      fieldName: "Tester",
+      fieldType: "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
+      value: testerUserId,
+    });
   }
 
-  if (devPlatform?.name === "Frontend") {
-    return JiraComponents.DEV_PLATFORM_FRONTEND;
-  }
-
-  if (devPlatform?.name === "Backend") {
-    return JiraComponents.DEV_PLATFORM_BACKEND;
-  }
+  return values;
 };
 
-const getLabels = (youtrackIssue: Issue) => {
-  const labels = youtrackIssue.tags?.map(convertYouTrackTagToJiraTag) || [];
-  const subsystem = getFieldValue(youtrackIssue, YouTrackFieldName.SUBSYSTEM);
+/**
+ * Преобразовывает задачу YouTrack в задачу Jira.
+ *
+ * @param youtrackIssue Объект с данными по задаче YouTrack
+ * @returns
+ */
+const convertYouTrackIssueToJiraIssue = (youtrackIssue: Issue, { projectKey }: Options) => {
+  const key = `${projectKey}-${youtrackIssue.numberInProject}`;
 
-  if (subsystem?.name === "Admin") {
-    labels.push("Admin");
-  }
+  // log(youtrackIssue);
 
-  return labels;
-};
-
-const getPriority = (youtrackIssue: Issue) => {
-  const priority = getFieldValue(
-    youtrackIssue,
-    YouTrackFieldName.PRIORITY
-  )?.name;
-
-  switch (priority) {
-    case YouTrackPriority.BLOCKER:
-      return JiraPriority.BLOCKER;
-    case YouTrackPriority.CRITICAL:
-      return JiraPriority.HIGH;
-    case YouTrackPriority.MAJOR:
-      return JiraPriority.HIGH;
-    case YouTrackPriority.MINOR:
-      return JiraPriority.LOW;
-    case YouTrackPriority.NORMAL:
-      return JiraPriority.MEDIUM;
-    default:
-      return JiraPriority.MEDIUM;
-  }
-};
-
-export const convertYouTrackToJira = (youtrackIssue: Issue) => {
-  const data: JiraApi.IssueObject = {
-    // id: "40633",
-    // self: "https://joom-team.atlassian.net/rest/api/2/issue/40633",
-    key: `MERCHANT-${youtrackIssue.numberInProject}`,
-    project: { id: "10034" },
-  };
-
-  // @ts-expect-error
-  const fields: Record<WellKnownFieldName, unknown> = {
-    summary: youtrackIssue.summary,
-
-    // @error: Field 'updated' cannot be set. It is not on the appropriate screen, or unknown.
-    // updated: youtrackIssue.updated,
-
-    project: { key: "MERCHANT" },
-
-    // @todo [ajile]: I’m not sure it’s correct format
-    labels: getLabels(youtrackIssue),
-
-    // @error: Field 'reporter' cannot be set. It is not on the appropriate screen, or unknown.
-    // reporter:
-    //   youtrackIssue.reporter &&
-    //   {id: convertYouTrackUserToJiraUser(youtrackIssue.reporter)},
-    // creator:
-    //   youtrackIssue.reporter &&
-    //   {id: convertYouTrackUserToJiraUser(youtrackIssue.reporter)},
-
-    // @todo [ajile]: Thereis no such field in Jira
-    // updater
-
-    // @todo [ajile]: Figure out format in YouTrack and Jira
-    // @error: Field 'comment' cannot be set. It is not on the appropriate screen, or unknown.
-    // comment: {
-    //   comments: youtrackIssue.comments,
-    // },
-
-    // @error: Field 'created' cannot be set. It is not on the appropriate screen, or unknown.
-    // created: youtrackIssue.created,
-
-    // @todo [ajile]: Convert MD to Jira format
+  const data: JiraExportIssue = {
+    key: key,
+    externalId: key,
+    summary: youtrackIssue.summary!,
     description: youtrackIssue.description,
+    created: new Date(youtrackIssue.created!),
 
-    priority: getPriority(youtrackIssue)
-      ? { id: getPriority(youtrackIssue) }
-      : undefined,
+    issueType: serializeIssueType(youtrackIssue.fields),
+    priority: serializeIssuePriority(youtrackIssue.fields),
+    status: serializeIssueStatus(youtrackIssue.fields),
 
-    // @todo [ajile]: Import “links”
+    labels: serializeLabels(youtrackIssue),
+    components: serializeComponent(youtrackIssue.fields),
 
-    issuetype: { id: getYouTrackIssueType(youtrackIssue) },
+    assignee: serializeAssignee(youtrackIssue.fields),
+    reporter: youtrackIssue.reporter && serializeUser(youtrackIssue.reporter),
 
-    // status: { id: "10027" },
-    // resolutiondate: youtrackIssue.resolved
-    //   ? new Date(youtrackIssue.resolved)
-    //   : undefined,
+    /**
+     * @todo [ajile]: С комментариями в задачах есть проблемы:
+     *                  1. При повторном импортировании комментарии повторно добавляются к задаче
+     *                     из-за чего дублируются;
+     *                  2. В комментариях могут содержаться файлы — их прикрепить к комментарию
+     *                     при экспорте невозможно формат импортирования этого не предусматривает.
+     */
+    comments: serializeIssueComments(youtrackIssue.comments),
 
-    components: getJiraIssueComponent(youtrackIssue)
-      ? [{ id: getJiraIssueComponent(youtrackIssue) }]
-      : undefined,
+    /**
+     * @todo [ajile]: С приложениями в задачах есть проблемы: При повторном импортировании файлы
+     *                повторно добавляются к задаче из-за чего дублируются
+     */
+    attachments: serializeIssueAttachments(youtrackIssue.attachments),
+
+    customFieldValues: serializeIssueCustomFieldValues(youtrackIssue),
+    originalEstimate: serializeIssueEstimation(youtrackIssue.fields),
   };
-
-  data.fields = fields;
 
   return data;
 };
+
+/**
+ * Возвращает статичный список компонентов проекта.
+ */
+export const getComponents = () => {
+  return jiraComponents.map((component) => ({
+    description: component.description,
+    lead: component.lead,
+    name: component.name,
+  }));
+};
+
+export const getJiraExportJson = (youtrackIssues: Issue[]) => {
+  return {
+    projects: [
+      {
+        name: "Merchant Test",
+        key: "MT",
+        description: "Merchant Test project description",
+        components: getComponents(),
+        issues: youtrackIssues.map((issue) => convertYouTrackIssueToJiraIssue(issue, { projectKey: "MT" })),
+      },
+    ],
+  };
+};
+
+// @todo [ajile]: В задаче YT хранится релизная версия и Fix versions, можно релизы тоже перенести в Jira
+// @todo [ajile]: Учитывать On Production при определении статуса задачи для фронтов
+// @todo [ajile]: Import “links”

@@ -3,5 +3,4 @@ import { YargsArguments } from "../../types";
 
 export type YargsArgumentsYouTrack = YargsArguments & {
   youtrack: Youtrack;
-  "project-name": string;
 };

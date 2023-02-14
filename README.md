@@ -9,17 +9,19 @@
 
 ```sh
 # Создаем словарь соответствия пользователей в YouTrack с пользователями Jira.
-DEBUG=migrator:* ./index.ts utils generate-user-map > ./src/dicts/users.json
+DEBUG=migrator:* ./index.ts migrator generate-user-map > ./src/converter/dicts/users.json
 ```
 
 ## Запуск
 
 Help:
+
 ```sh
 DEBUG=migrator:* ./index.ts --help
 ```
 
-Вывести список задач:
+## Создание экспорт файла под задачу
+
 ```sh
-DEBUG=migrator:* ./index.ts issues --limit=10
+./index.ts migrator generate-export-json --issue-id=MERCHANT-9150
 ```
