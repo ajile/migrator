@@ -1,5 +1,6 @@
 import createLogger from "debug";
 import { IssueComment } from "youtrack-rest-client";
+import { JiraExportIssueComment } from "../types";
 import { serializeUser } from "./serializeUser";
 
 const log = createLogger("migrator:converter:fields:serializeIssueComments");
@@ -7,25 +8,33 @@ const log = createLogger("migrator:converter:fields:serializeIssueComments");
 export const serializeIssueComments = (comments: IssueComment[] = []) => {
   log("Comments count", comments.length);
 
-  return comments.map((comment) => {
+  return comments.reduce<JiraExportIssueComment[]>((acc, comment) => {
+    if (comment.deleted) {
+      return acc;
+    }
+
     if (!comment.author) {
+      debugger;
       throw new Error("No `author` found in a comment!");
     }
     if (!comment.text) {
+      debugger;
       throw new Error("No `text` found in a comment!");
     }
     if (!comment.created) {
+      debugger;
       throw new Error("No `created` found in a comment!");
     }
 
-    return {
+    acc.push({
       body: comment.text,
       author: serializeUser(comment.author),
       created: new Date(comment.created),
-      id: "38977",
       // @todo [ajile]: Add attachments?
-    };
-  });
+    });
+
+    return acc;
+  }, []);
 };
 
 // @todo [ajile]: https://support.atlassian.com/jira-cloud-administration/docs/import-data-from-json/

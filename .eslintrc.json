@@ -12,6 +12,7 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {
+    "no-debugger": "off",
     "max-len": ["error", { "code": 120 }],
     "@typescript-eslint/no-explicit-any": "off"
   }

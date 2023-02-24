@@ -8,7 +8,7 @@ import { YouTrackPriority } from "../dicts/youtrack/priority";
 import { YoutrackStatus } from "../dicts/youtrack/status";
 import { YoutrackSubsystem } from "../dicts/youtrack/subsystem";
 
-const log = createLogger("migrator:converter:fields:getFieldValue");
+const log = createLogger("migrator:converter:utils:getFieldValue");
 
 type UserValue = ReducedUser;
 type EnumValue<T> = T;

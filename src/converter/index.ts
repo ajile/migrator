@@ -14,6 +14,7 @@ import { serializeUser } from "./serializers/serializeUser";
 import { JiraExportIssue, JiraExportIssueCustomFieldValue } from "./types";
 import { jiraComponents } from "./dicts/jira/component";
 import { serializeIssueEstimation } from "./serializers/serializeIssueEstimation";
+import { serializeReporter } from "./serializers/serializeReporter";
 
 const log = createLogger("migrator:converter");
 
@@ -45,7 +46,7 @@ const serializeIssueCustomFieldValues = (youtrackIssue: Issue) => {
 const convertYouTrackIssueToJiraIssue = (youtrackIssue: Issue, { projectKey }: Options) => {
   const key = `${projectKey}-${youtrackIssue.numberInProject}`;
 
-  // log(youtrackIssue);
+  log(`Converting issue with ID`, key);
 
   const data: JiraExportIssue = {
     key: key,
@@ -62,7 +63,7 @@ const convertYouTrackIssueToJiraIssue = (youtrackIssue: Issue, { projectKey }: O
     components: serializeComponent(youtrackIssue.fields),
 
     assignee: serializeAssignee(youtrackIssue.fields),
-    reporter: youtrackIssue.reporter && serializeUser(youtrackIssue.reporter),
+    reporter: serializeReporter(youtrackIssue),
 
     /**
      * @todo [ajile]: С комментариями в задачах есть проблемы:

@@ -39,7 +39,7 @@ const jiraStatuses = [
   { name: "Waiting For Invoice", id: "10113" },
   { name: "Waiting For Payment", id: "10114" },
   { name: "Waiting For Release", id: "10068" },
-  { name: "Won T Fix", id: "10163" },
+  { name: "Won't fix", id: "10163" },
   { name: "Готовим К Выдаче", id: "10110" },
   { name: "Ожидаем Технику", id: "10111" },
 ] as const;

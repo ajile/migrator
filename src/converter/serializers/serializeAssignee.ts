@@ -1,16 +1,15 @@
 import createLogger from "debug";
-import { Issue } from "youtrack-rest-client";
-import { YouTrackFieldName } from "../dicts/youtrack/fields";
-import { serializeUser } from "./serializeUser";
-import { getFieldValue } from "./getFieldValue";
 import { IssueCustomField } from "youtrack-rest-client/dist/entities/issueCustomField";
+import { YouTrackFieldName } from "../dicts/youtrack/fields";
+import { getFieldValue } from "../utils/getFieldValue";
+import { serializeUser } from "./serializeUser";
 
 const log = createLogger("migrator:converter:fields:serializeAssignee");
 
 export const serializeAssignee = (fields: IssueCustomField[] = []) => {
   const assignee = getFieldValue(fields, YouTrackFieldName.ASSIGNEE);
 
-  log(`Get assignee`);
+  log(`Getting Jira user ID by YouTrack user ID`, assignee?.id);
 
   return assignee?.id ? serializeUser(assignee) : undefined;
 };

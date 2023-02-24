@@ -60,6 +60,9 @@ export const withYoutrack = (yargs: Argv) =>
                       // как-то усилить.
                       return (issueId) => receiverYT.get(`issues/${issueId}`, { params: { fields: fields.join(",") } });
                     }
+                    if (prop === "search") {
+                      return (query) => receiverYT.get(`issues`, { params: { fields: fields.join(","), query } });
+                    }
                     return Reflect.get(target, prop, receiver);
                   },
                 });

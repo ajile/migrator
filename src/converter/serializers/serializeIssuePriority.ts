@@ -3,14 +3,14 @@ import { IssueCustomField } from "youtrack-rest-client/dist/entities/issueCustom
 import { JiraIssuePriorityName } from "../dicts/jira/priority";
 import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { YouTrackPriority } from "../dicts/youtrack/priority";
-import { getFieldValue } from "./getFieldValue";
+import { getFieldValue } from "../utils/getFieldValue";
 
 const log = createLogger("migrator:converter:fields:serializeIssuePriority");
 
 export const serializeIssuePriority = (fields: IssueCustomField[] = []): JiraIssuePriorityName => {
   const priority = getFieldValue(fields, YouTrackFieldName.PRIORITY);
 
-  log("Priority is", priority);
+  log("YouTrack priority is", priority);
 
   switch (priority) {
     case YouTrackPriority.BLOCKER:

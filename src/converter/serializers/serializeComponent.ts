@@ -4,7 +4,7 @@ import { JiraComponentName } from "../dicts/jira/component";
 import { YoutrackDevPlatform } from "../dicts/youtrack/dev-platform";
 import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { YoutrackSubsystem } from "../dicts/youtrack/subsystem";
-import { getFieldValue } from "./getFieldValue";
+import { getFieldValue } from "../utils/getFieldValue";
 
 const log = createLogger("migrator:converter:fields:serializeComponent");
 
