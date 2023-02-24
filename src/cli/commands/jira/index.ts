@@ -11,6 +11,7 @@ export const builder = (yargs: Argv) =>
     .command(require("./field-screens"))
     .command(require("./fields"))
     .command(require("./issue-createmeta"))
+    .command(require("./issue-link-types"))
     .command(require("./issue-types"))
     .command(require("./issue"))
     .command(require("./my-permissions"))

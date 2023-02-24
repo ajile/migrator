@@ -22,6 +22,8 @@ DEBUG=migrator:* ./index.ts --help
 
 ## Создание экспорт файла под задачу
 
+Эта команда будет постранично получать задачи из YouTrack и походу приводить к формату Jira. В конце команда выдаст JSON для экспортирования задач в Jira.
+
 ```sh
-./index.ts migrator generate-export-json --issue-id=MERCHANT-9150
+./index.ts migrator generate-export-json
 ```

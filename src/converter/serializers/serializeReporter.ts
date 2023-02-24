@@ -11,8 +11,10 @@ export const serializeReporter = (issue: Issue) => {
     log(`Looking Jira user ID for YouTrack user ID`, issue.reporter.id);
     userId = serializeUser(issue.reporter);
 
+    // @todo [ajile]: User 145-0, 26-124 and 26-193 have been deleted. I’ve replaced it by myself,
+    // for debugging purpose. But we need to figure out what to do in these cases!!!
     if (!userId) {
-      throw new Error("No Jira user found!");
+      throw new Error(`No Jira user found! YT User ID is “${issue.reporter.id}” in ${issue.numberInProject}.`);
     }
   }
 

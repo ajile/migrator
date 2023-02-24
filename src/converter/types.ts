@@ -1,5 +1,6 @@
 import { JiraComponentName } from "./dicts/jira/component";
 import { JiraIssueTypeName } from "./dicts/jira/issue-type";
+import { JiraIssueLinkTypeName } from "./dicts/jira/link";
 import { JiraIssuePriorityName } from "./dicts/jira/priority";
 import { JiraIssueStatusName } from "./dicts/jira/status";
 
@@ -71,10 +72,16 @@ export interface JiraExportIssueCustomFieldValueTester {
   fieldType: "com.atlassian.jira.plugin.system.customfieldtypes:userpicker";
   value: JiraExportIssueUser;
 }
+export interface JiraExportIssueCustomFieldValueEpicName {
+  fieldName: "Epic Name";
+  fieldType: "com.pyxis.greenhopper.jira:gh-epic-label";
+  value: string;
+}
 
 export type JiraExportIssueCustomFieldValue =
   | JiraExportIssueCustomFieldValueBase
-  | JiraExportIssueCustomFieldValueTester;
+  | JiraExportIssueCustomFieldValueTester
+  | JiraExportIssueCustomFieldValueEpicName;
 
 export interface JiraExportIssueComment {
   /**
@@ -132,4 +139,10 @@ export interface JiraExportIssue {
   // @todo [ajile]: ?
   // resolution?: JiraExportIssueResolution;
   // updated: "P-1D";
+}
+
+export interface JiraExportLink {
+  name: JiraIssueLinkTypeName;
+  sourceId: string;
+  destinationId: string;
 }

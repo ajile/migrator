@@ -9,7 +9,7 @@ export const serializeUser = (youtrackUser: ReducedUser) => {
   const userMap = { ...require("../dicts/users.json"), ...require("../dicts/users-well-known.json") };
   const jiraUserId = userMap[youtrackUser.id];
 
-  log("Invoke for YouTrack user ID", youtrackUser.id);
+  log("Invoke for YouTrack user ID", youtrackUser.id, youtrackUser);
 
   return jiraUserId;
 };

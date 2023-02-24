@@ -11,10 +11,12 @@ import { serializeIssueType } from "./serializers/serializeIssueType";
 import { serializeLabels } from "./serializers/serializeLabels";
 import { serializeIssuePriority } from "./serializers/serializeIssuePriority";
 import { serializeUser } from "./serializers/serializeUser";
-import { JiraExportIssue, JiraExportIssueCustomFieldValue } from "./types";
+import { JiraExportIssue, JiraExportIssueCustomFieldValue, JiraExportLink } from "./types";
 import { jiraComponents } from "./dicts/jira/component";
 import { serializeIssueEstimation } from "./serializers/serializeIssueEstimation";
 import { serializeReporter } from "./serializers/serializeReporter";
+import { serializeIssueDescription } from "./serializers/serializeIssueDescription";
+import { IssueLink } from "youtrack-rest-client/dist/entities/issueLink";
 
 const log = createLogger("migrator:converter");
 
@@ -24,6 +26,7 @@ type Options = {
 
 const serializeIssueCustomFieldValues = (youtrackIssue: Issue) => {
   const values: JiraExportIssueCustomFieldValue[] = [];
+  const issueType = serializeIssueType(youtrackIssue.fields);
   const testerUserId = serializeIssueTester(youtrackIssue.fields);
 
   if (testerUserId) {
@@ -31,6 +34,15 @@ const serializeIssueCustomFieldValues = (youtrackIssue: Issue) => {
       fieldName: "Tester",
       fieldType: "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
       value: testerUserId,
+    });
+  }
+
+  log("=>", issueType);
+  if (issueType === "Epic") {
+    values.push({
+      fieldName: "Epic Name",
+      fieldType: "com.pyxis.greenhopper.jira:gh-epic-label",
+      value: "Test Epic Name",
     });
   }
 
@@ -52,7 +64,7 @@ const convertYouTrackIssueToJiraIssue = (youtrackIssue: Issue, { projectKey }: O
     key: key,
     externalId: key,
     summary: youtrackIssue.summary!,
-    description: youtrackIssue.description,
+    description: serializeIssueDescription(youtrackIssue.description),
     created: new Date(youtrackIssue.created!),
 
     issueType: serializeIssueType(youtrackIssue.fields),
@@ -87,6 +99,29 @@ const convertYouTrackIssueToJiraIssue = (youtrackIssue: Issue, { projectKey }: O
   return data;
 };
 
+const normalizeIssueLink = (ytLinks: IssueLink[], numberInProject: number) => {
+  const links = ytLinks?.filter((link) => link.issues.length);
+
+  return links
+    .filter((link) => link.issues.length)
+    .flatMap((link) => {
+      return link.issues.map((issue) => ({
+        from: numberInProject,
+        to: issue.numberInProject,
+        linkType:
+          link.direction === "OUTWARD" || link.direction === "BOTH"
+            ? link.linkType?.sourceToTarget
+            : link.linkType?.targetToSource,
+        linkName: link.linkType?.name,
+      }));
+    });
+};
+const convertYouTrackIssueLinkToJiraIssueLink = (youtrackIssue: Issue) => {
+  const links = normalizeIssueLink(youtrackIssue.links || [], youtrackIssue.numberInProject!);
+
+  return links;
+};
+
 /**
  * Возвращает статичный список компонентов проекта.
  */
@@ -98,7 +133,19 @@ export const getComponents = () => {
   }));
 };
 
-export const getJiraExportJson = (youtrackIssues: Issue[]) => {
+export const getJiraExportJson = async (ytIssues: AsyncGenerator<Issue>) => {
+  const issues: JiraExportIssue[] = [];
+  const links: unknown[] = [];
+
+  for await (const ytIssue of ytIssues) {
+    issues.push(convertYouTrackIssueToJiraIssue(ytIssue, { projectKey: "MT" }));
+
+    const issueLinks = convertYouTrackIssueLinkToJiraIssueLink(ytIssue);
+    if (issueLinks) {
+      issueLinks.forEach((link) => links.push(link));
+    }
+  }
+
   return {
     projects: [
       {
@@ -106,7 +153,8 @@ export const getJiraExportJson = (youtrackIssues: Issue[]) => {
         key: "MT",
         description: "Merchant Test project description",
         components: getComponents(),
-        issues: youtrackIssues.map((issue) => convertYouTrackIssueToJiraIssue(issue, { projectKey: "MT" })),
+        issues,
+        // links,
       },
     ],
   };

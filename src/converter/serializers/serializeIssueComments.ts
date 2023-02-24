@@ -13,15 +13,15 @@ export const serializeIssueComments = (comments: IssueComment[] = []) => {
       return acc;
     }
 
-    if (!comment.author) {
+    if (comment.author === undefined || comment.author === null) {
       debugger;
       throw new Error("No `author` found in a comment!");
     }
-    if (!comment.text) {
+    if (comment.text === undefined || comment.text === null) {
       debugger;
       throw new Error("No `text` found in a comment!");
     }
-    if (!comment.created) {
+    if (comment.created === undefined || comment.created === null) {
       debugger;
       throw new Error("No `created` found in a comment!");
     }
