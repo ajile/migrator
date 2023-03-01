@@ -57,7 +57,8 @@ type JiraIssueLinkType = JiraIssueLinkTypeList[number];
  * Имя компонента в Jira.
  */
 export type JiraIssueLinkTypeName = JiraIssueLinkType["name"];
-
+export type JiraIssueLinkTypeInward = JiraIssueLinkType["inward"];
+export type JiraIssueLinkTypeOutward = JiraIssueLinkType["outward"];
 /**
  * Идентификатор компонента в Jira.
  */

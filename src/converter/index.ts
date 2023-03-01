@@ -17,6 +17,7 @@ import { serializeIssueEstimation } from "./serializers/serializeIssueEstimation
 import { serializeReporter } from "./serializers/serializeReporter";
 import { serializeIssueDescription } from "./serializers/serializeIssueDescription";
 import { IssueLink } from "youtrack-rest-client/dist/entities/issueLink";
+import { jiraIssueLinkTypeByYouTrackIssueLinkType } from "./dicts/mapping/issue-link-type";
 
 const log = createLogger("migrator:converter");
 
@@ -37,7 +38,7 @@ const serializeIssueCustomFieldValues = (youtrackIssue: Issue) => {
     });
   }
 
-  log("=>", issueType);
+  // log("=>", issueType);
   if (issueType === "Epic") {
     values.push({
       fieldName: "Epic Name",
@@ -99,27 +100,74 @@ const convertYouTrackIssueToJiraIssue = (youtrackIssue: Issue, { projectKey }: O
   return data;
 };
 
-const normalizeIssueLink = (ytLinks: IssueLink[], numberInProject: number) => {
+const normalizeIssueLink = (ytLinks: IssueLink[], numberInProject: number, projectKey: string) => {
   const links = ytLinks?.filter((link) => link.issues.length);
+
+  const revert = {};
 
   return links
     .filter((link) => link.issues.length)
     .flatMap((link) => {
-      return link.issues.map((issue) => ({
-        from: numberInProject,
-        to: issue.numberInProject,
-        linkType:
+      return link.issues.map((issue) => {
+        const leftTaskKey = `${projectKey}-${numberInProject}`;
+        const rightTaskKey = `${projectKey}-${issue.numberInProject}`;
+
+        let from = leftTaskKey;
+        let to = rightTaskKey;
+        let linkType =
           link.direction === "OUTWARD" || link.direction === "BOTH"
             ? link.linkType?.sourceToTarget
-            : link.linkType?.targetToSource,
-        linkName: link.linkType?.name,
-      }));
+            : link.linkType?.targetToSource;
+        const linkName = link.linkType?.name;
+
+        if (link.direction === "OUTWARD") {
+          if (link.linkType?.sourceToTarget === "is duplicated by") {
+            from = rightTaskKey;
+            to = leftTaskKey;
+            linkType = "duplicates";
+          }
+        }
+
+        return {
+          from,
+          to,
+          linkType,
+          linkName,
+        };
+      });
     });
 };
-const convertYouTrackIssueLinkToJiraIssueLink = (youtrackIssue: Issue) => {
-  const links = normalizeIssueLink(youtrackIssue.links || [], youtrackIssue.numberInProject!);
+const convertYouTrackIssueLinkToJiraIssueLink = (links: any[]) => {
+  const youtrackOutwards = new Set(["relates to", "is required for", "duplicates", "subtask of", "As measured by"]);
+  const visitedRelatesTo = new Set();
 
-  return links;
+  const filteredLinks = links.filter((link) => {
+    if (link.linkType === "relates to" && (visitedRelatesTo.has(link.from) || visitedRelatesTo.has(link.to))) {
+      return false;
+    }
+
+    // log("=====", link.linkType);
+
+    visitedRelatesTo.add(link.from);
+    visitedRelatesTo.add(link.to);
+
+    return link.linkType && youtrackOutwards.has(link.linkType);
+  });
+
+  // Deduplication
+  // log(`links`, links);
+  // log(`filteredLinks`, filteredLinks);
+
+  return filteredLinks.map((link) =>
+    link.linkType
+      ? {
+          // linkType: link.linkType,
+          name: jiraIssueLinkTypeByYouTrackIssueLinkType[link.linkType],
+          sourceId: link.from,
+          destinationId: link.to,
+        }
+      : undefined
+  );
 };
 
 /**
@@ -140,10 +188,11 @@ export const getJiraExportJson = async (ytIssues: AsyncGenerator<Issue>) => {
   for await (const ytIssue of ytIssues) {
     issues.push(convertYouTrackIssueToJiraIssue(ytIssue, { projectKey: "MT" }));
 
-    const issueLinks = convertYouTrackIssueLinkToJiraIssueLink(ytIssue);
-    if (issueLinks) {
-      issueLinks.forEach((link) => links.push(link));
-    }
+    links.push(normalizeIssueLink(ytIssue.links || [], ytIssue.numberInProject!, "MT"));
+    // const issueLinks = convertYouTrackIssueLinkToJiraIssueLink(ytIssue, "MT");
+    // if (issueLinks) {
+    //   issueLinks.forEach((link) => links.push(link));
+    // }
   }
 
   return {
@@ -154,12 +203,11 @@ export const getJiraExportJson = async (ytIssues: AsyncGenerator<Issue>) => {
         description: "Merchant Test project description",
         components: getComponents(),
         issues,
-        // links,
       },
     ],
+    links: convertYouTrackIssueLinkToJiraIssueLink(links.flat()),
   };
 };
 
 // @todo [ajile]: В задаче YT хранится релизная версия и Fix versions, можно релизы тоже перенести в Jira
 // @todo [ajile]: Учитывать On Production при определении статуса задачи для фронтов
-// @todo [ajile]: Import “links”
