@@ -1,7 +1,7 @@
 import createLogger from "debug";
 import { IssueComment } from "youtrack-rest-client";
 import { JiraExportIssueComment } from "../types";
-import { serializeUser } from "./serializeUser";
+import { serializeUser } from "../utils/serializeUser";
 
 const log = createLogger("migrator:converter:fields:serializeIssueComments");
 

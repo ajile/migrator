@@ -1,6 +1,6 @@
 import createLogger from "debug";
 import { IssueAttachment } from "youtrack-rest-client";
-import { serializeUser } from "./serializeUser";
+import { serializeUser } from "../utils/serializeUser";
 
 const log = createLogger("migrator:converter:fields:serializeIssueAttachments");
 

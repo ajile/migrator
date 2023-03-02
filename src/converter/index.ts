@@ -1,23 +1,21 @@
 import createLogger from "debug";
 import { Issue } from "youtrack-rest-client";
-import { JiraFieldName } from "./dicts/jira/fields";
+import { IssueLink } from "youtrack-rest-client/dist/entities/issueLink";
+import { jiraComponents } from "./dicts/jira/component";
+import { jiraIssueLinkTypeByYouTrackIssueLinkType } from "./dicts/mapping/issue-link-type";
 import { serializeAssignee } from "./serializers/serializeAssignee";
 import { serializeComponent } from "./serializers/serializeComponent";
 import { serializeIssueAttachments } from "./serializers/serializeIssueAttachments";
 import { serializeIssueComments } from "./serializers/serializeIssueComments";
+import { serializeIssueDescription } from "./serializers/serializeIssueDescription";
+import { serializeIssueEstimation } from "./serializers/serializeIssueEstimation";
+import { serializeIssuePriority } from "./serializers/serializeIssuePriority";
 import { serializeIssueStatus } from "./serializers/serializeIssueStatus";
 import { serializeIssueTester } from "./serializers/serializeIssueTester";
 import { serializeIssueType } from "./serializers/serializeIssueType";
 import { serializeLabels } from "./serializers/serializeLabels";
-import { serializeIssuePriority } from "./serializers/serializeIssuePriority";
-import { serializeUser } from "./serializers/serializeUser";
-import { JiraExportIssue, JiraExportIssueCustomFieldValue, JiraExportLink } from "./types";
-import { jiraComponents } from "./dicts/jira/component";
-import { serializeIssueEstimation } from "./serializers/serializeIssueEstimation";
 import { serializeReporter } from "./serializers/serializeReporter";
-import { serializeIssueDescription } from "./serializers/serializeIssueDescription";
-import { IssueLink } from "youtrack-rest-client/dist/entities/issueLink";
-import { jiraIssueLinkTypeByYouTrackIssueLinkType } from "./dicts/mapping/issue-link-type";
+import { JiraExportIssue, JiraExportIssueCustomFieldValue } from "./types";
 
 const log = createLogger("migrator:converter");
 
@@ -100,42 +98,33 @@ const convertYouTrackIssueToJiraIssue = (youtrackIssue: Issue, { projectKey }: O
   return data;
 };
 
+const mixHash = (...args) => `${args.sort()}`;
+
 const normalizeIssueLink = (ytLinks: IssueLink[], numberInProject: number, projectKey: string) => {
   const links = ytLinks?.filter((link) => link.issues.length);
 
-  const revert = {};
+  return links.flatMap((link) => {
+    return link.issues.map((issue) => {
+      log(mixHash("task1", "task2", "Duplicate"));
+      log(mixHash("task2", "task1", "Duplicate"));
 
-  return links
-    .filter((link) => link.issues.length)
-    .flatMap((link) => {
-      return link.issues.map((issue) => {
-        const leftTaskKey = `${projectKey}-${numberInProject}`;
-        const rightTaskKey = `${projectKey}-${issue.numberInProject}`;
+      const task1 = `${projectKey}-${numberInProject}`;
+      const task2 = `${projectKey}-${issue.numberInProject}`;
+      const direction = link.direction;
+      const linkName = link.linkType?.name;
+      const sourceToTarget = link.linkType?.sourceToTarget;
+      const targetToSource = link.linkType?.targetToSource;
 
-        let from = leftTaskKey;
-        let to = rightTaskKey;
-        let linkType =
-          link.direction === "OUTWARD" || link.direction === "BOTH"
-            ? link.linkType?.sourceToTarget
-            : link.linkType?.targetToSource;
-        const linkName = link.linkType?.name;
-
-        if (link.direction === "OUTWARD") {
-          if (link.linkType?.sourceToTarget === "is duplicated by") {
-            from = rightTaskKey;
-            to = leftTaskKey;
-            linkType = "duplicates";
-          }
-        }
-
-        return {
-          from,
-          to,
-          linkType,
-          linkName,
-        };
-      });
+      return {
+        task1,
+        task2,
+        direction,
+        linkName,
+        sourceToTarget,
+        targetToSource,
+      };
     });
+  });
 };
 const convertYouTrackIssueLinkToJiraIssueLink = (links: any[]) => {
   const youtrackOutwards = new Set(["relates to", "is required for", "duplicates", "subtask of", "As measured by"]);
@@ -188,7 +177,7 @@ export const getJiraExportJson = async (ytIssues: AsyncGenerator<Issue>) => {
   for await (const ytIssue of ytIssues) {
     issues.push(convertYouTrackIssueToJiraIssue(ytIssue, { projectKey: "MT" }));
 
-    links.push(normalizeIssueLink(ytIssue.links || [], ytIssue.numberInProject!, "MT"));
+    log("Normalized links", normalizeIssueLink(ytIssue.links || [], ytIssue.numberInProject!, "MT"));
     // const issueLinks = convertYouTrackIssueLinkToJiraIssueLink(ytIssue, "MT");
     // if (issueLinks) {
     //   issueLinks.forEach((link) => links.push(link));
