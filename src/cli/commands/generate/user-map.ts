@@ -1,7 +1,7 @@
 import { ArgumentsCamelCase } from "yargs";
 import { YargsArgumentsMigrator } from "./types";
 
-export const command = "generate-user-map";
+export const command = "user-map";
 
 export const describe = "Generates mapping YouTrack Users → Jira Users";
 

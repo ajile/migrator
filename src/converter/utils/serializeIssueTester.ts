@@ -4,13 +4,12 @@ import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { getFieldValue } from "../utils/getFieldValue";
 import { serializeUser } from "../utils/serializeUser";
 
-const log = createLogger("migrator:converter:fields:serializeIssueTester");
+const log = createLogger("migrator:converter:utils:serializeIssueTester");
 
 export const serializeIssueTester = (fields: IssueCustomField[] = []) => {
   const tester = getFieldValue(fields, YouTrackFieldName.TESTER);
 
-  log(`Looging for tester`);
+  log(`Looking for tester`);
 
-  // @todo [ajile]: Test it
   return tester?.id ? serializeUser(tester) : undefined;
 };

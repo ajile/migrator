@@ -1,13 +1,14 @@
 import { JiraComponentName } from "./dicts/jira/component";
+import { JiraFieldName } from "./dicts/jira/fields";
 import { JiraIssueTypeName } from "./dicts/jira/issue-type";
 import { JiraIssueLinkTypeName } from "./dicts/jira/link";
 import { JiraIssuePriorityName } from "./dicts/jira/priority";
+import { JiraResolutionName } from "./dicts/jira/resolution";
 import { JiraIssueStatusName } from "./dicts/jira/status";
 
 type JiraExportIssueId = string;
 type JiraExportIssueUser = string;
 type JiraExportIssueUserEmail = string;
-type JiraExportIssueResolution = string;
 type JiraExportIssueDateString = string;
 type JiraExportIssueVersion = string;
 
@@ -56,7 +57,7 @@ export interface JiraExportIssueCustomFieldValueBase {
   /**
    * @example Story Points
    */
-  fieldName: string;
+  fieldName: JiraFieldName;
   /**
    * @example com.atlassian.jira.plugin.system.customfieldtypes:float
    */
@@ -136,8 +137,9 @@ export interface JiraExportIssue {
   fixedVersions?: JiraExportIssueVersion[];
   history?: JiraExportIssueHistoryRecord[];
 
+  resolution?: JiraResolutionName;
+
   // @todo [ajile]: ?
-  // resolution?: JiraExportIssueResolution;
   // updated: "P-1D";
 }
 

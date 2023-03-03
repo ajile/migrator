@@ -1,0 +1,44 @@
+{
+	"files": [
+		{
+			"path": "src/converter/dicts/mapping/issue-link-type.ts",
+			"bookmarks": [
+				{
+					"line": 3,
+					"column": 53,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "src/converter/dicts/jira/link.ts",
+			"bookmarks": [
+				{
+					"line": 0,
+					"column": 13,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "src/converter/dicts/youtrack/link.ts",
+			"bookmarks": [
+				{
+					"line": 0,
+					"column": 13,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "src/adapters/youtrack/endpoints/issue.ts",
+			"bookmarks": [
+				{
+					"line": 60,
+					"column": 3,
+					"label": ""
+				}
+			]
+		}
+	]
+}

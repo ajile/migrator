@@ -26,6 +26,9 @@ const issueFields = [
   `project(id,name,shortName,description,archived)`,
   `summary`,
   `description`,
+
+  // Здесь нужна информация о типе задачи, чтобы правильно установить отношения между задачей и эпиком
+  `fields(id,name,value(id,name))`,
 ];
 
 const linkFields = [
@@ -34,20 +37,6 @@ const linkFields = [
   `linkType(id,name,sourceToTarget,targetToSource,directed,aggregation,readOnly)`,
   `issue(${issueFields})`,
   `issues(${issueFields})`,
-];
-
-const commentFields = [
-  `author(${userFields})`,
-  `deleted`,
-  `issue(${issueFields})`,
-  `attachments`,
-  `created`,
-  `id`,
-  `text`,
-  `textPreview`,
-  `updated`,
-  `usesMarkdown`,
-  `visibility`,
 ];
 
 const attachmentFields = [
@@ -63,6 +52,20 @@ const attachmentFields = [
   `updatedBy`,
   `visibleToGroups`,
   `visibleToUsers`,
+];
+
+const commentFields = [
+  `author(${userFields})`,
+  `deleted`,
+  `issue(${issueFields})`,
+  `attachments(${attachmentFields})`,
+  `created`,
+  `id`,
+  `text`,
+  `textPreview`,
+  `updated`,
+  `usesMarkdown`,
+  `visibility`,
 ];
 
 const baseFields = [

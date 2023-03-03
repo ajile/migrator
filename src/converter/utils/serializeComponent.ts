@@ -6,7 +6,7 @@ import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { YoutrackSubsystem } from "../dicts/youtrack/subsystem";
 import { getFieldValue } from "../utils/getFieldValue";
 
-const log = createLogger("migrator:converter:fields:serializeComponent");
+const log = createLogger("migrator:converter:utils:serializeComponent");
 
 export const serializeComponent = (fields: IssueCustomField[] = []): JiraComponentName[] => {
   const subsystem = getFieldValue(fields || [], YouTrackFieldName.SUBSYSTEM);

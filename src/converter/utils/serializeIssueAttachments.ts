@@ -2,7 +2,7 @@ import createLogger from "debug";
 import { IssueAttachment } from "youtrack-rest-client";
 import { serializeUser } from "../utils/serializeUser";
 
-const log = createLogger("migrator:converter:fields:serializeIssueAttachments");
+const log = createLogger("migrator:converter:utils:serializeIssueAttachments");
 
 export const serializeIssueAttachments = (attachments: IssueAttachment[] = []) => {
   log("Attachments count", attachments.length);

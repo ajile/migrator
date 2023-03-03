@@ -4,7 +4,7 @@ import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { YoutrackSubsystem } from "../dicts/youtrack/subsystem";
 import { getFieldValue } from "../utils/getFieldValue";
 
-const log = createLogger("migrator:converter:fields:serializeLabels");
+const log = createLogger("migrator:converter:utils:serializeLabels");
 
 export const serializeLabels = (youtrackIssue: Issue) => {
   const labels = youtrackIssue.tags?.map((tag) => tag.name) || [];

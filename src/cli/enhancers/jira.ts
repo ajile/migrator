@@ -1,5 +1,5 @@
-import JiraApi from "jira-client";
 import { Argv } from "yargs";
+import { JiraApi } from "../../adapters/jira";
 
 export const withJira = (yargs: Argv) =>
   yargs
@@ -18,10 +18,7 @@ export const withJira = (yargs: Argv) =>
       default: process.env.JIRA_USERNAME,
       describe: "The username in Jira",
     })
-    .demandOption(
-      ["jira"],
-      "Please provide all arguments to work with this tool"
-    )
+    .demandOption(["jira"], "Please provide all arguments to work with this tool")
     .coerce(
       ["jira"],
       ({

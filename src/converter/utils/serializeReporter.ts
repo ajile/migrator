@@ -2,7 +2,7 @@ import createLogger from "debug";
 import { Issue } from "youtrack-rest-client";
 import { serializeUser } from "../utils/serializeUser";
 
-const log = createLogger("migrator:converter:fields:serializeReporter");
+const log = createLogger("migrator:converter:utils:serializeReporter");
 
 export const serializeReporter = (issue: Issue) => {
   let userId;

@@ -3,7 +3,7 @@ import { IssueCustomField } from "youtrack-rest-client/dist/entities/issueCustom
 import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { getFieldValue } from "../utils/getFieldValue";
 
-const log = createLogger("migrator:converter:fields:serializeIssueEstimation");
+const log = createLogger("migrator:converter:utils:serializeIssueEstimation");
 
 export const serializeIssueEstimation = (fields: IssueCustomField[] = []) => {
   const estimation = getFieldValue(fields, YouTrackFieldName.ESTIMATION);

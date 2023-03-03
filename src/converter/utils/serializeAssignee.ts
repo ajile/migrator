@@ -1,10 +1,10 @@
 import createLogger from "debug";
 import { IssueCustomField } from "youtrack-rest-client/dist/entities/issueCustomField";
 import { YouTrackFieldName } from "../dicts/youtrack/fields";
-import { getFieldValue } from "../utils/getFieldValue";
-import { serializeUser } from "../utils/serializeUser";
+import { getFieldValue } from "./getFieldValue";
+import { serializeUser } from "./serializeUser";
 
-const log = createLogger("migrator:converter:fields:serializeAssignee");
+const log = createLogger("migrator:converter:utils:serializeAssignee");
 
 export const serializeAssignee = (fields: IssueCustomField[] = []) => {
   const assignee = getFieldValue(fields, YouTrackFieldName.ASSIGNEE);

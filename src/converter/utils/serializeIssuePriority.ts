@@ -5,7 +5,7 @@ import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { YouTrackPriority } from "../dicts/youtrack/priority";
 import { getFieldValue } from "../utils/getFieldValue";
 
-const log = createLogger("migrator:converter:fields:serializeIssuePriority");
+const log = createLogger("migrator:converter:utils:serializeIssuePriority");
 
 export const serializeIssuePriority = (fields: IssueCustomField[] = []): JiraIssuePriorityName => {
   const priority = getFieldValue(fields, YouTrackFieldName.PRIORITY);

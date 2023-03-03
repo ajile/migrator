@@ -1,9 +1,10 @@
+import j2m from "jira2md";
 import createLogger from "debug";
 import { IssueComment } from "youtrack-rest-client";
 import { JiraExportIssueComment } from "../types";
 import { serializeUser } from "../utils/serializeUser";
 
-const log = createLogger("migrator:converter:fields:serializeIssueComments");
+const log = createLogger("migrator:converter:utils:serializeIssueComments");
 
 export const serializeIssueComments = (comments: IssueComment[] = []) => {
   log("Comments count", comments.length);
@@ -27,7 +28,7 @@ export const serializeIssueComments = (comments: IssueComment[] = []) => {
     }
 
     acc.push({
-      body: comment.text,
+      body: j2m.to_jira(comment.text),
       author: serializeUser(comment.author),
       created: new Date(comment.created),
       // @todo [ajile]: Add attachments?

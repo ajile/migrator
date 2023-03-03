@@ -3,13 +3,15 @@
 ## Подготовка
 
 1. Создайте файл `.env` и определите в нем значения переменных на примере файла `.env.example`.
-2. Установите нод-зависимости
+2. Установите нод-зависимости.
+3. Можете установить переменную окружения `DEBUG=migrator:*` для показа логов.
 
 ## Создание словарей
 
+Создание мапы пользователей:
+
 ```sh
-# Создаем словарь соответствия пользователей в YouTrack с пользователями Jira.
-DEBUG=migrator:* ./index.ts migrator generate-user-map > ./src/converter/dicts/users.json
+./index.ts generate user-map > ./src/converter/dicts/users.json
 ```
 
 ## Запуск
@@ -17,13 +19,45 @@ DEBUG=migrator:* ./index.ts migrator generate-user-map > ./src/converter/dicts/u
 Help:
 
 ```sh
-DEBUG=migrator:* ./index.ts --help
+./index.ts --help
 ```
 
-## Создание экспорт файла под задачу
+## Команды
 
-Эта команда будет постранично получать задачи из YouTrack и походу приводить к формату Jira. В конце команда выдаст JSON для экспортирования задач в Jira.
+## Генератор экспорт-файлов
+
+Генератор позволяет создавать JSON-файлы для импорта задач, связей, комментариев и прочего в Jira. Загрузка файлов и последующий импорт происходит на странице Jira Settings → System → Import and Export → External System Import. Процесс импорта разбит на 4 шага: импорт задач, импорт связей, импорт комментариев и импорт файлов. Такое деление исходит не столько из соображений удобства дебаггинга, но также является необходимостью.
+
+Jira по разному относится к задачам, связям, комментариям и файлам. В то время как задачи апсёртятся (для этого используется идентификатор `externalId`), все остальное создается по новому при каждом импорте.
+
+Создание JSON файла для импорта задач:
 
 ```sh
-./index.ts migrator generate-export-json
+./index.ts generate issues > exports/1.issues.json
+```
+
+Создание JSON файла для импорта связей между задачами:
+
+```sh
+./index.ts generate links > exports/2.links.json
+```
+
+Создание JSON файла для импорта комментариев:
+
+```sh
+./index.ts generate comments > exports/3.comments.json
+```
+
+Создание JSON файла для импорта приложений:
+
+```sh
+./index.ts generate attachments > exports/4.attachments.json
+```
+
+## Jira
+
+Очистка проекта от задач (выполняется очень медленно):
+
+```sh
+./index.ts jira prune-project
 ```

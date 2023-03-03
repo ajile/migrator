@@ -8,4 +8,4 @@ module.exports = yargs
   .version(packageFile.version)
   .command(require("./commands/jira"))
   .command(require("./commands/youtrack"))
-  .command(require("./commands/migrator"));
+  .command(require("./commands/generate"));

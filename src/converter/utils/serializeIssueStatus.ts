@@ -4,7 +4,7 @@ import { jiraIssueStatusNameByYouTrackIssueStatusId } from "../dicts/mapping/iss
 import { YouTrackFieldName } from "../dicts/youtrack/fields";
 import { getFieldValue } from "../utils/getFieldValue";
 
-const log = createLogger("migrator:converter:fields:serializeIssueStatus");
+const log = createLogger("migrator:converter:utils:serializeIssueStatus");
 
 export const serializeIssueStatus = (fields: IssueCustomField[] = []) => {
   const stateId = getFieldValue(fields || [], YouTrackFieldName.STATE);
