@@ -27,9 +27,6 @@ export const handler = async function (argv: Argv): Promise<void> {
   // Стартуем прогресс бар (count — общее количество, 0 — текущее значение)
   bar.start(count, startAt);
 
-  // @todo [ajile]: Remove
-  // bar.stop();
-
   // Получаем асинхронный генератор возвращающий задачи
   const issues = await argv.youtrack.issues.allSearch(QUERY, { skip: startAt, partition: 1500 });
 

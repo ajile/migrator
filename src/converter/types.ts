@@ -131,17 +131,14 @@ export interface JiraExportIssue {
    */
   originalEstimate?: string;
 
+  resolution?: JiraResolutionName;
+  updated?: Date;
+
   // @todo [ajile]: Список полей ниже требуется разобрать…
   watchers?: JiraExportIssueUser[];
   affectedVersions?: JiraExportIssueVersion[];
   fixedVersions?: JiraExportIssueVersion[];
   history?: JiraExportIssueHistoryRecord[];
-
-  resolution?: JiraResolutionName;
-
-  // @todo [ajile]: ?
-  // "P-1D"
-  updated?: Date;
 }
 
 export interface JiraExportLink {

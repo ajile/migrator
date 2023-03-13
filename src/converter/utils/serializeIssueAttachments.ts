@@ -7,7 +7,6 @@ const log = createLogger("migrator:converter:utils:serializeIssueAttachments");
 export const serializeIssueAttachments = (attachments: IssueAttachment[] = []) => {
   log("Attachments count", attachments.length);
 
-  // @todo [ajile]: There is no user 26-748. Attempting to create attachment with no user.
   return attachments.map((attachment) => {
     const userId: string = serializeUser(attachment.author);
 

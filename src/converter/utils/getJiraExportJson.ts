@@ -92,6 +92,3 @@ export const getJiraExportJson = async (ytIssues: AsyncGenerator<Issue>, { proje
     ],
   };
 };
-
-// @todo [ajile]: В задаче YT хранится релизная версия и Fix versions, можно релизы тоже перенести в Jira
-// @todo [ajile]: Учитывать On Production при определении статуса задачи для фронтов

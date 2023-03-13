@@ -31,16 +31,8 @@ export const serializeIssueComments = (comments: IssueComment[] = []) => {
       body: j2m.to_jira(comment.text),
       author: serializeUser(comment.author),
       created: new Date(comment.created),
-      // @todo [ajile]: Add attachments?
     });
 
     return acc;
   }, []);
 };
-
-// @todo [ajile]: https://support.atlassian.com/jira-cloud-administration/docs/import-data-from-json/
-// "body": "This private comment",
-//                             "author": "557057:1a8aeee5-40e9-413a-9f4e-2f074f09644a",
-//                             "created": "2012-08-31T17:59:02.161+0100",
-//                             "updated": "2012-08-31T17:59:02.161+0100",
-//                             "properties

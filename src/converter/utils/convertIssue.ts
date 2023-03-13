@@ -50,19 +50,8 @@ export const convertIssue = (youtrackIssue: Issue, { projectKey, links }: Option
     assignee: serializeAssignee(youtrackIssue.fields),
     reporter: serializeReporter(youtrackIssue),
 
-    /**
-     * @todo [ajile]: С комментариями в задачах есть проблемы:
-     *                  1. При повторном импортировании комментарии повторно добавляются к задаче
-     *                     из-за чего дублируются;
-     *                  2. В комментариях могут содержаться файлы — их прикрепить к комментарию
-     *                     при экспорте невозможно формат импортирования этого не предусматривает.
-     */
     comments: serializeIssueComments(youtrackIssue.comments),
 
-    /**
-     * @todo [ajile]: С приложениями в задачах есть проблемы: При повторном импортировании файлы
-     *                повторно добавляются к задаче из-за чего дублируются
-     */
     attachments: serializeIssueAttachments(youtrackIssue.attachments),
 
     customFieldValues: serializeIssueCustomFieldValues(youtrackIssue, { links, projectKey }),
