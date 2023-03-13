@@ -11,8 +11,8 @@ export const describe = "Generates JSON to export YouTrack links to Jira";
 const PROJECT_KEY = "MT";
 
 // const QUERY = `issue id: MERCHANT-8253`;
-const QUERY = `tag: {Merchant Accounts}`;
-// const QUERY = `project: {Merchant Services}`;
+const QUERY = `project: {Merchant Services}`;
+// const QUERY = `tag: {Merchant Accounts}`;
 // const QUERY = `issue id: MERCHANT-8936 issue id: MERCHANT-9023 issue id: MERCHANT-9074`;
 
 type Argv = ArgumentsCamelCase<YargsArgumentsMigrator>;

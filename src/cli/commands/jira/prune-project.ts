@@ -11,7 +11,11 @@ const QUERY = 'project = "MT"';
 // const QUERY = 'project = "MT" and labels = rich-content';
 
 export const handler = async function (argv: ArgumentsCamelCase<YargsArgumentsJira & { id: string }>): Promise<void> {
-  const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+  const opt = {
+    format: "progress [{bar}] {percentage}% | ETA: {eta}s | {value}/{total} | Task: {task}",
+  };
+
+  const bar = new cliProgress.SingleBar(opt, cliProgress.Presets.shades_classic);
 
   const { total } = await argv.jira.searchJira(QUERY, { maxResults: 1 });
   bar.start(total, 0);
@@ -24,7 +28,7 @@ export const handler = async function (argv: ArgumentsCamelCase<YargsArgumentsJi
       console.log(issue);
       throw new Error("The issue doesn’t start with MT!!!");
     }
-    bar.increment();
+    bar.increment(1, { task: issue.key });
     await argv.jira.deleteIssue(issue.key);
   }
 

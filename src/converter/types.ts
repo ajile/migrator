@@ -140,7 +140,8 @@ export interface JiraExportIssue {
   resolution?: JiraResolutionName;
 
   // @todo [ajile]: ?
-  // updated: "P-1D";
+  // "P-1D"
+  updated?: Date;
 }
 
 export interface JiraExportLink {

@@ -11,8 +11,8 @@ export const describe = "Generates JSON to export YouTrack comments to Jira";
 
 const PROJECT_KEY = "MT";
 
-// const QUERY = `project: {Merchant Services}`;
-const QUERY = `tag: {Merchant Accounts}`;
+const QUERY = `project: {Merchant Services}`;
+// const QUERY = `tag: {Merchant Accounts}`;
 
 type Argv = ArgumentsCamelCase<YargsArgumentsMigrator>;
 

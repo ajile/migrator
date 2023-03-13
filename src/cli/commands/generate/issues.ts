@@ -11,8 +11,8 @@ export const describe = "Generates JSON to export YouTrack issues to Jira";
 
 const PROJECT_KEY = "MT";
 
-// const QUERY = `project: {Merchant Services}`;
-const QUERY = `tag: {Merchant Accounts}`;
+const QUERY = `project: {Merchant Services}`;
+// const QUERY = `tag: {Merchant Accounts}`;
 
 // Много связей
 // const QUERY = `issue id: MERCHANT-9305 issue id: MERCHANT-9306 issue id: MERCHANT-9307 issue id: MERCHANT-9308 issue id: MERCHANT-9309`;

@@ -37,6 +37,7 @@ const convertIssue = (youtrackIssue: Issue, { projectKey }: Options) => {
     summary: youtrackIssue.summary!,
     description: serializeIssueDescription(youtrackIssue.description),
     created: new Date(youtrackIssue.created!),
+    updated: youtrackIssue.updated ? new Date(youtrackIssue.updated) : undefined,
 
     issueType: serializeIssueType(youtrackIssue.fields),
     priority: serializeIssuePriority(youtrackIssue.fields),
